@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,36 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        if self.count < self.items.len() {
+            self.items[self.count] = value;
+        } else {
+            self.items.push(value);
+        }
+
+        self.bubble_up(self.count);
+    }
+
+    fn bubble_up(&mut self, idx: usize) {
+        if idx == 1 {
+            return;
+        }
+        let parent_idx = self.parent_idx(idx);
+        if (self.comparator)(&self.items[idx], &self.items[parent_idx]) {
+            self.items.swap(idx, parent_idx);
+            self.bubble_up(parent_idx);
+        }
+    }
+
+    fn bubble_down(&mut self, idx: usize) {
+        if !self.children_present(idx) {
+            return;
+        }
+        let smallest_child_idx = self.smallest_child_idx(idx);
+        if (self.comparator)(&self.items[smallest_child_idx], &self.items[idx]) {
+            self.items.swap(idx, smallest_child_idx);
+            self.bubble_down(smallest_child_idx);
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +85,18 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        if right > self.count {
+            return left;
+        }
+
+        if (self.comparator)(&self.items[left], &self.items[right]) {
+            return left;
+        } else {
+            return right;
+        }
     }
 }
 
@@ -84,8 +122,22 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        let result = std::mem::take(&mut self.items[1]);
+
+        if self.count > 1 {
+            self.items[1] = std::mem::take(&mut self.items[self.count]);
+        }
+
+        self.count -= 1;
+
+        if self.count > 0 {
+            self.bubble_down(1);
+        }
+
+        Some(result)
     }
 }
 
